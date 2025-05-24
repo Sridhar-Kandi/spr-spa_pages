@@ -473,8 +473,8 @@
 
     // Generate two distinct clusters for bimodal data
     for (let i = 0; i < 50; i++) {
-        bimodalData1.push({x: Math.random() * 1.5 + 1.5, y: Math.random() * 1.5 + 6.5 }); // Cluster 1
-        bimodalData2.push({x: Math.random() * 1.5 + 5, y: Math.random() * 1.5 + 2.5 }); // Cluster 2
+        bimodalData1.push({x: Math.random() * 0.8 + 1.5, y: Math.random() * 0.8 + 6.5 }); // Cluster 1 (tighter)
+        bimodalData2.push({x: Math.random() * 0.8 + 5.5, y: Math.random() * 0.8 + 2.5 }); // Cluster 2 (tighter)
     }
     const allBimodalData = [...bimodalData1, ...bimodalData2];
 
@@ -489,15 +489,23 @@
                 pointRadius: 5,
                 pointHoverRadius: 7
             }, {
-                type: 'line', // Conceptual single Gaussian fit
+                type: 'scatter', // Changed to scatter for line plotting
                 label: 'Poor Single Gaussian Fit',
-                data: [{x: 0.5, y: 3}, {x: 3.5, y: 7.5}, {x: 6.5, y: 3}], // Simplified ellipse contour
+                data: Array.from({length: 100}, (_, i) => { // Denser points for smoother ellipse
+                    const angle = (i / 100) * 2 * Math.PI;
+                    const centerX = 3.5; // Center between clusters
+                    const centerY = 4.5;
+                    const radiusX = 3.0; // Large radius to cover both
+                    const radiusY = 2.5;
+                    return { x: centerX + radiusX * Math.cos(angle), y: centerY + radiusY * Math.sin(angle) };
+                }),
                 borderColor: 'rgba(234, 88, 12, 0.8)', // orange-600
                 backgroundColor: 'rgba(234, 88, 12, 0.1)',
-                tension: 0.4,
-                fill: true,
-                borderWidth: 3,
-                pointRadius: 0
+                tension: 0.1, // Apply tension for smoother curve
+                fill: false, // Do not fill under the line
+                pointRadius: 0, // Hide individual points
+                showLine: true, // Explicitly show the line
+                borderWidth: 3
             }]
         },
         options: {
@@ -511,6 +519,79 @@
                 tooltip: {
                     callbacks: {
                         label: function(context) {
+                            if (context.dataset.label.includes('Gaussian')) return null;
+                            return `Data Point: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Chart for GMM Fit
+    const gmmFitCtx = document.getElementById('gmmFitChart').getContext('2d');
+    new Chart(gmmFitCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Data Points (Cluster 1)',
+                data: bimodalData1,
+                backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
+                pointRadius: 5,
+            }, {
+                label: 'Data Points (Cluster 2)',
+                data: bimodalData2,
+                backgroundColor: 'rgba(16, 185, 129, 0.6)', // emerald-500
+                pointRadius: 5,
+            },{ // Conceptual Gaussian 1
+                type: 'scatter', // Changed to scatter for line plotting
+                label: 'Gaussian 1 Fit',
+                data: Array.from({length: 100}, (_, i) => { // Denser points for smoother ellipse
+                    const angle = (i / 100) * 2 * Math.PI;
+                    const centerX = 2.0; // Center for cluster 1
+                    const centerY = 7.0;
+                    const radiusX = 1.0;
+                    const radiusY = 0.8;
+                    return { x: centerX + radiusX * Math.cos(angle), y: centerY + radiusY * Math.sin(angle) };
+                }),
+                borderColor: 'rgba(59, 130, 246, 0.8)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.1,
+                fill: false,
+                pointRadius: 0,
+                showLine: true,
+                borderWidth: 3
+            }, { // Conceptual Gaussian 2
+                type: 'scatter', // Changed to scatter for line plotting
+                label: 'Gaussian 2 Fit',
+                data: Array.from({length: 100}, (_, i) => { // Denser points for smoother ellipse
+                    const angle = (i / 100) * 2 * Math.PI;
+                    const centerX = 6.0; // Center for cluster 2
+                    const centerY = 3.0;
+                    const radiusX = 1.0;
+                    const radiusY = 0.8;
+                    return { x: centerX + radiusX * Math.cos(angle), y: centerY + radiusY * Math.sin(angle) };
+                }),
+                borderColor: 'rgba(16, 185, 129, 0.8)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.1,
+                fill: false,
+                pointRadius: 0,
+                showLine: true,
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Feature 1' }, min:0, max:8 },
+                y: { title: { display: true, text: 'Feature 2' }, min:0, max:9 }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                         label: function(context) {
                             if (context.dataset.label.includes('Gaussian')) return null;
                             return `Data Point: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
                         }
