@@ -7,18 +7,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <!-- Visualization & Content Choices:
-        - Introduction: Welcoming text.
-        - Core Concepts (GMM): Chart.js scatter for unimodal/multimodal comparison, Chart.js for GMM fit. Goal: Illustrate data distribution and GMM's solution.
-        - Challenges: Chart.js line plots for convex/non-convex functions. Goal: Explain optimization landscape issues.
-        - EM Algorithm: Conceptual Chart.js animation of Gaussian components adjusting. Goal: Demystify EM iterations.
-        - K-Means Clustering: Chart.js scatter with dynamic centroid and assignment updates. Goal: Show K-Means iterative process.
-        - K-Means Discussion: Textual explanation of complexity, convergence, and model selection.
-        - Deeper Dive EM: Detailed explanation of EM steps, formulas, derivations, and probability foundations.
-        - Formulas: Categorized formulas for GMM, K-Means, and EM components.
-        - Summary: Consolidated takeaways.
-        - All textual content is adapted for clarity and includes intuition and examples.
-        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script>
+        // Set MathJax configuration BEFORE loading the MathJax script
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body { font-family: 'Nunito', sans-serif; }
         .chart-container { position: relative; width: 100%; max-width: 800px; /* Increased max-width for better visual */ margin-left: auto; margin-right: auto; height: 350px; max-height: 450px; }
@@ -31,7 +32,6 @@
             line-height: 1.4;
         }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
-        .formula-term { border-bottom: 1px dotted #6366f1; font-weight: bold; } /* indigo-500 */
         .sticky-sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; }
         section { scroll-margin-top: 20px; } /* Offset for sticky nav if any, or general scroll alignment */
     </style>
@@ -183,7 +183,7 @@
                 <button id="emReset" class="ml-4 bg-neutral-500 hover:bg-neutral-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-150 ease-in-out">
                     Reset Animation
                 </button>
-                 <p id="emIterationText" class="mt-2 text-sm text-neutral-600">Iteration: 0</p>
+                   <p id="emIterationText" class="mt-2 text-sm text-neutral-600">Iteration: 0</p>
             </div>
             <p class="mt-6 text-neutral-700 leading-relaxed">
                 EM is guaranteed to improve the likelihood of the data with each step, converging to a local maximum. While not always the absolute global best, it's a very effective solution in practice.
@@ -201,7 +201,7 @@
                 <li>
                     <strong class="text-indigo-600">Given:</strong> A set of data points X = {x<sub>1</sub>, ..., x<sub>N</sub>}.
                     <p class="text-sm text-neutral-600 mt-1"><strong>Intuition</strong>: This is your raw data, like a list of customer details (age, income, spending).</p>
-                    <p class="text-sm text-neutral-600 mt-1"><strong>Example</strong>: You have data for 100 customers (N=100), where each x<sub>n</sub> is a customer's (Age, Income).</p>
+                    <p class="text-sm text-neutral-600 mt-1"><strong>Example</strong>: You have data for 100 customers (N=100), where each $x_n$ is a customer's (Age, Income).</p>
                 </li>
                 <li>
                     <strong class="text-indigo-600">Sought:</strong>
@@ -210,7 +210,7 @@
                             <p class="text-sm text-neutral-600 mt-1"><strong>Intuition</strong>: We want to divide our customers into K distinct groups, where each customer belongs to only one group.</p>
                             <p class="text-sm text-neutral-600 mt-1"><strong>Example</strong>: Grouping 100 customers into K=3 segments (e.g., "Young Savers," "Mid-Age Spenders," "Elderly Investors").</p>
                         </li>
-                        <li>The cluster centroids &mu;<sub>k</sub>.
+                        <li>The cluster centroids $\mu_k$.
                             <p class="text-sm text-neutral-600 mt-1"><strong>Intuition</strong>: For each group, we find a central point that best represents it. This "centroid" is like the average customer profile for that group.</p>
                             <p class="text-sm text-neutral-600 mt-1"><strong>Example</strong>: The centroid for "Young Savers" might be (25 years, $30,000 income$).</p>
                         </li>
@@ -222,16 +222,14 @@
             <p class="mb-4 text-neutral-700 leading-relaxed">
                 K-Means tries to minimize the total squared distance between each data point and the center of the cluster it's assigned to. This makes the clusters as "tight" as possible.
             </p>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    J = &Sigma;<sub>n=1</sub><sup>N</sup> &Sigma;<sub>k=1</sub><sup>K</sup>
-                    <span class="tooltip formula-term"> r<sub>nk</sub> <span class="tooltiptext">Binary assignment: 1 if data point n is in cluster k, 0 otherwise. (Hard assignment)</span></span>
-                    <span class="tooltip formula-term"> ||x<sub>n</sub> - &mu;<sub>k</sub>||<sup>2</sup> <span class="tooltiptext">Squared Euclidean distance between data point x<sub>n</sub> and cluster centroid &mu;<sub>k</sub>.</span></span>
-                </p>
-                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside">
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ J = \sum_{n=1}^{N} \sum_{k=1}^{K} r_{nk} \|x_n - \mu_k\|^2 $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
                     <li><span class="font-semibold">J:</span> The objective function to minimize (total squared distance).</li>
                     <li><span class="font-semibold">N:</span> Total number of data points.</li>
                     <li><span class="font-semibold">K:</span> Total number of clusters.</li>
+                    <li><span class="font-semibold">$r_{nk}$:</span> Binary assignment: 1 if data point $n$ is in cluster $k$, 0 otherwise. (Hard assignment)</li>
+                    <li><span class="font-semibold">$\|x_n - \mu_k\|^2$:</span> Squared Euclidean distance between data point $x_n$ and cluster centroid $\mu_k$.</li>
                 </ul>
             </div>
             <p class="mb-4 text-neutral-700 leading-relaxed">
@@ -255,13 +253,13 @@
                     <strong class="text-emerald-600">E-Step (Assignment Step):</strong> For each data point, assign it to the cluster whose centroid is closest.
                     <p class="text-sm text-neutral-600 mt-1"><strong>Intuition</strong>: "Every data point goes to its nearest neighbor cluster."</p>
                     <p class="text-sm text-neutral-600 mt-1"><strong>Example</strong>: Each of your 100 customers is assigned to the "average customer profile" (centroid) that they are most similar to (closest in terms of age and income).</p>
-                    <p class="text-sm text-neutral-600 mt-1"><strong>Formal Rule</strong>: r<sub>nk</sub> = 1 if k = argmin<sub>j</sub> ||x<sub>n</sub> - &mu;<sub>j</sub>||<sup>2</sup>, else 0.</p>
+                    <p class="text-sm text-neutral-600 mt-1"><strong>Formal Rule</strong>: $r_{nk} = 1$ if $k = \arg\min_j \|x_n - \mu_j\|^2$, else 0.</p>
                 </li>
                 <li>
                     <strong class="text-emerald-600">M-Step (Update Step):</strong> For each cluster, update its centroid to be the mean (average position) of all data points currently assigned to that cluster.
                     <p class="text-sm text-neutral-600 mt-1"><strong>Intuition</strong>: "Now that we know who belongs to each cluster, let's move the cluster center to the true middle of its members."</p>
                     <p class="text-sm text-neutral-600 mt-1"><strong>Example</strong>: The "Young Savers" centroid is updated to be the average age and income of all customers who were assigned to that segment in the previous step.</p>
-                    <p class="text-sm text-neutral-600 mt-1"><strong>Formal Rule</strong>: &mu;<sub>k</sub> = &Sigma;<sub>n</sub> r<sub>nk</sub> x<sub>n</sub> / &Sigma;<sub>n</sub> r<sub>nk</sub></p>
+                    <p class="text-sm text-neutral-600 mt-1"><strong>Formal Rule</strong>: $\mu_k = \frac{\sum_n r_{nk} x_n}{\sum_n r_{nk}}$</p>
                 </li>
             </ol>
             <p class="mb-4 text-neutral-700 leading-relaxed">
@@ -282,7 +280,7 @@
                 <button id="kmeansReset" class="ml-4 bg-neutral-500 hover:bg-neutral-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-150 ease-in-out">
                     Reset Animation
                 </button>
-                 <p id="kmeansIterationText" class="mt-2 text-sm text-neutral-600">Iteration: 0</p>
+                   <p id="kmeansIterationText" class="mt-2 text-sm text-neutral-600">Iteration: 0</p>
             </div>
             <p class="mt-6 text-neutral-700 leading-relaxed">
                 <strong>Overall Intuition</strong>: The algorithm is like a game of "musical chairs" for data points. Points move to the closest chair (centroid), then the chairs move to the center of their new groups. This repeats until no one wants to move chairs anymore.
@@ -354,85 +352,103 @@
         <section id="formulas" class="my-12 p-6 bg-white rounded-xl shadow-md">
             <h2 class="text-3xl font-bold text-blue-800 mb-6">Key Formulas</h2>
             <p class="mb-4 text-neutral-700 leading-relaxed">
-                Here are the core mathematical expressions for the models and algorithms we've discussed, categorized for easier reference. Hover over the bold terms for detailed explanations.
+                Here are the core mathematical expressions for the models and algorithms we've discussed, categorized for easier reference.
             </p>
 
             <h3 class="text-2xl font-semibold text-blue-700 mb-4">Gaussian Mixture Model (GMM) Formulas:</h3>
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">GMM Probability Density Function:</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    p(x) = &Sigma;<sub>k=1</sub><sup>K</sup>
-                    <span class="tooltip formula-term"> &pi;<sub>k</sub> <span class="tooltiptext">Mixture coefficient for component k: the weight or proportion of this Gaussian in the mix. All &pi;<sub>k</sub> sum to 1.</span></span>
-                    <span class="tooltip formula-term"> &#8475;(x | &mu;<sub>k</sub>, &Sigma;<sub>k</sub>) <span class="tooltiptext">The k-th Gaussian component, defined by its mean (&mu;<sub>k</sub>) and covariance (&Sigma;<sub>k</sub>). It describes the probability of x given this component.</span></span>
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ p(x) = \sum_{k=1}^{K} \pi_k \mathcal{N}(x | \mu_k, \Sigma_k) $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$p(x)$:</span> The probability density function of the GMM for data point $x$.</li>
+                    <li><span class="font-semibold">$K$:</span> The total number of Gaussian components.</li>
+                    <li><span class="font-semibold">$\pi_k$:</span> Mixture coefficient for component $k$: the weight or proportion of this Gaussian in the mix. All $\pi_k$ sum to 1.</li>
+                    <li><span class="font-semibold">$\mathcal{N}(x | \mu_k, \Sigma_k)$:</span> The $k$-th Gaussian component, defined by its mean ($\mu_k$) and covariance ($\Sigma_k$). It describes the probability of $x$ given this component.</li>
+                </ul>
             </div>
 
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">Log-Likelihood Function for GMM:</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    ln p(X|&pi;, &mu;, &Sigma;) = &Sigma;<sub>n=1</sub><sup>N</sup> ln ( &Sigma;<sub>k=1</sub><sup>K</sup> &pi;<sub>k</sub> &#8475;(x<sub>n</sub>|&mu;<sub>k</sub>, &Sigma;<sub>k</sub>) )
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ \ln p(X|\pi, \mu, \Sigma) = \sum_{n=1}^{N} \ln \left( \sum_{k=1}^{K} \pi_k \mathcal{N}(x_n|\mu_k, \Sigma_k) \right) $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$\ln p(X|\pi, \mu, \Sigma)$:</span> The log-likelihood of the observed data $X$ given the GMM parameters ($\pi$, $\mu$, $\Sigma$). Maximizing this function is the goal of EM.</li>
+                    <li><span class="font-semibold">$N$:</span> Total number of data points.</li>
+                </ul>
             </div>
 
             <h3 class="text-2xl font-semibold text-blue-700 mb-4 mt-8">Expectation-Maximization (EM) Algorithm Formulas:</h3>
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">E-Step: Responsibility (Posterior Probability) Formula:</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    &gamma;(z<sub>nk</sub>) = p(z<sub>k</sub> = 1|x<sub>n</sub>) = <br>
-                    <span class="inline-block align-middle">&frac;&#8475;(x<sub>n</sub>|&mu;<sub>k</sub>,&Sigma;<sub>k</sub>)&pi;<sub>k</sub>;</span><span class="inline-block align-middle">&Sigma;<sub>j=1</sub><sup>K</sup> &#8475;(x<sub>n</sub>|&mu;<sub>j</sub>,&Sigma;<sub>j</sub>)&pi;<sub>j</sub>;</span>
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ \gamma(z_{nk}) = p(z_k = 1|x_n) = \frac{\mathcal{N}(x_n|\mu_k,\Sigma_k)\pi_k}{\sum_{j=1}^{K} \mathcal{N}(x_n|\mu_j,\Sigma_j)\pi_j} $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$\gamma(z_{nk})$:</span> The responsibility of Gaussian component $k$ for data point $x_n$. This is the posterior probability that $x_n$ belongs to component $k$.</li>
+                </ul>
             </div>
 
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">M-Step: Mean Update Rule:</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    &mu;<sub>k</sub><sup>new</sup> = <span class="inline-block align-middle">&frac;&Sigma;<sub>n=1</sub><sup>N</sup> &gamma;(z<sub>nk</sub>) x<sub>n</sub>;&Sigma;<sub>n=1</sub><sup>N</sup> &gamma;(z<sub>nk</sub>);</span>
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ \mu_k^{\text{new}} = \frac{\sum_{n=1}^{N} \gamma(z_{nk}) x_n}{\sum_{n=1}^{N} \gamma(z_{nk})} $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$\mu_k^{\text{new}}$:</span> The new mean for Gaussian component $k$. It's a weighted average of all data points, where weights are their responsibilities to component $k$.</li>
+                </ul>
             </div>
 
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">M-Step: Covariance Update Rule:</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    &Sigma;<sub>k</sub><sup>new</sup> = <span class="inline-block align-middle">&frac;&Sigma;<sub>n=1</sub><sup>N</sup> &gamma;(z<sub>nk</sub>) (x<sub>n</sub> - &mu;<sub>k</sub><sup>new</sup>)(x<sub>n</sub> - &mu;<sub>k</sub><sup>new</sup>)<sup>T</sup>;&Sigma;<sub>n=1</sub><sup>N</sup> &gamma;(z<sub>nk</sub>);</span>
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ \Sigma_k^{\text{new}} = \frac{\sum_{n=1}^{N} \gamma(z_{nk}) (x_n - \mu_k^{\text{new}})(x_n - \mu_k^{\text{new}})^T}{\sum_{n=1}^{N} \gamma(z_{nk})} $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$\Sigma_k^{\text{new}}$:</span> The new covariance matrix for Gaussian component $k$. It's a weighted average of the outer products of the centered data points.</li>
+                    <li><span class="font-semibold">$^T$:</span> Denotes the transpose of a vector/matrix.</li>
+                </ul>
             </div>
 
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">M-Step: Mixture Coefficient Update Rule:</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    &pi;<sub>k</sub><sup>new</sup> = <span class="inline-block align-middle">&frac;&Sigma;<sub>n=1</sub><sup>N</sup> &gamma;(z<sub>nk</sub>);N;</span>
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ \pi_k^{\text{new}} = \frac{\sum_{n=1}^{N} \gamma(z_{nk})}{N} $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$\pi_k^{\text{new}}$:</span> The new mixing coefficient for Gaussian component $k$. It's the sum of responsibilities for component $k$, normalized by the total number of data points.</li>
+                </ul>
             </div>
 
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">Law of Total Probability (General Form):</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    P(A) = &Sigma;<sub>i=1</sub><sup>M</sup> P(A | B<sub>i</sub>) P(B<sub>i</sub>)
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ P(A) = \sum_{i=1}^{M} P(A | B_i) P(B_i) $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$P(A)$:</span> The probability of event A.</li>
+                    <li><span class="font-semibold">$P(A | B_i)$:</span> The conditional probability of event A given event $B_i$.</li>
+                    <li><span class="font-semibold">$P(B_i)$:</span> The probability of event $B_i$.</li>
+                    <li><span class="font-semibold">$M$:</span> The total number of mutually exclusive and exhaustive events $B_i$.</li>
+                </ul>
             </div>
 
             <h3 class="text-2xl font-semibold text-blue-700 mb-4 mt-8">K-Means Clustering Formulas:</h3>
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">K-Means Objective (Cost) Function:</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    J = &Sigma;<sub>n=1</sub><sup>N</sup> &Sigma;<sub>k=1</sub><sup>K</sup>
-                    <span class="tooltip formula-term"> r<sub>nk</sub> <span class="tooltiptext">Binary assignment: 1 if data point n is in cluster k, 0 otherwise. (Hard assignment)</span></span>
-                    <span class="tooltip formula-term"> ||x<sub>n</sub> - &mu;<sub>k</sub>||<sup>2</sup> <span class="tooltiptext">Squared Euclidean distance between data point x<sub>n</sub> and cluster centroid &mu;<sub>k</sub>.</span></span>
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ J = \sum_{n=1}^{N} \sum_{k=1}^{K} r_{nk} \|x_n - \mu_k\|^2 $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">J:</span> The objective function to minimize (total squared distance).</li>
+                    <li><span class="font-semibold">N:</span> Total number of data points.</li>
+                    <li><span class="font-semibold">K:</span> Total number of clusters.</li>
+                    <li><span class="font-semibold">$r_{nk}$:</span> Binary assignment: 1 if data point $n$ is in cluster $k$, 0 otherwise. (Hard assignment)</li>
+                    <li><span class="font-semibold">$\|x_n - \mu_k\|^2$:</span> Squared Euclidean distance between data point $x_n$ and cluster centroid $\mu_k$.</li>
+                </ul>
             </div>
 
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">K-Means Assignment Rule (E-Step):</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    r<sub>nk</sub> = 1 if k = argmin<sub>j</sub> ||x<sub>n</sub> - &mu;<sub>j</sub>||<sup>2</sup>, else 0.
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ r_{nk} = \begin{cases} 1 & \text{if } k = \arg\min_j \|x_n - \mu_j\|^2 \\ 0 & \text{otherwise} \end{cases} $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$r_{nk}$:</span> The hard assignment indicator, which is 1 if data point $x_n$ is assigned to cluster $k$, and 0 otherwise.</li>
+                    <li><span class="font-semibold">$\arg\min_j$:</span> The index $j$ that minimizes the following expression.</li>
+                </ul>
             </div>
 
             <h4 class="text-xl font-semibold text-blue-600 mb-2 mt-4">K-Means Centroid Update Rule (M-Step):</h4>
-            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200">
-                <p class="text-lg text-center font-mono text-neutral-700 break-all">
-                    &mu;<sub>k</sub> = &Sigma;<sub>n</sub> r<sub>nk</sub> x<sub>n</sub> / &Sigma;<sub>n</sub> r<sub>nk</sub>
-                </p>
+            <div class="mb-6 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-center">
+                $$ \mu_k = \frac{\sum_n r_{nk} x_n}{\sum_n r_{nk}} $$
+                <ul class="mt-4 text-sm text-neutral-600 list-disc list-inside text-left">
+                    <li><span class="font-semibold">$\mu_k$:</span> The centroid of cluster $k$, calculated as the mean of all data points assigned to that cluster.</li>
+                </ul>
             </div>
         </section>
 
@@ -591,7 +607,7 @@
             plugins: {
                 tooltip: {
                     callbacks: {
-                         label: function(context) {
+                        label: function(context) {
                             if (context.dataset.label.includes('Gaussian')) return null;
                             return `Data Point: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
                         }
